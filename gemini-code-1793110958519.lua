@@ -1,5 +1,5 @@
 -- =================================================================
--- TOBOX TACTICAL HUB [MOBILE VERSION + SECRET KEY SYSTEM]
+-- TOBOX TACTICAL HUB [MOBILE FIXED: AUTO-AIM, CENTER FOV & ESP]
 -- Authors: Nazik & Jura
 -- =================================================================
 local Players = game:GetService("Players")
@@ -15,7 +15,6 @@ pcall(function()
 end)
 
 local CORRECT_KEY = "ToBoxMobile2026"
-local isAuthorized = false
 
 local ScreenGui = Instance.new("ScreenGui", PlayerGui)
 ScreenGui.Name = "ToBoxMobileHub"
@@ -32,7 +31,7 @@ local function ApplyStyle(inst, bg, str, radius)
     return stroke
 end
 
--- ВІКНО ВВЕДЕННЯ КЛЮЧА (ПАРОЛЯ)
+-- ВІКНО АВТОРИЗАЦІЇ
 local KeyFrame = Instance.new("Frame", ScreenGui)
 KeyFrame.Size, KeyFrame.Position = UDim2.new(0, 300, 0, 180), UDim2.new(0.5, -150, 0.5, -90)
 KeyFrame.Active, KeyFrame.Draggable = true, true
@@ -56,30 +55,25 @@ SubmitBtn.Text = "ПІДТВЕРДИТИ КЛЮЧ"
 SubmitBtn.TextColor3, SubmitBtn.Font, SubmitBtn.TextSize = Color3.fromRGB(255, 255, 255), Enum.Font.SourceSansBold, 14
 ApplyStyle(SubmitBtn, Color3.fromRGB(0, 180, 90), Color3.fromRGB(0, 255, 120), 8)
 
--- ФУНКЦІЯ ЗАПУСКУ ОСНОВНОГО ІНТЕРФЕЙСУ ПІСЛЯ ВВЕДЕННЯ ПАРОЛЯ
 local function LaunchHub()
     KeyFrame:Destroy()
-    isAuthorized = true
 
     local CurrentLanguage = "UA"
-    local IsDarkMode = true
-
     local Translations = {
         UA = {
-            Combat = "Бій", Visuals = "Візуали", CharTab = "Персонаж", Keys = "Клавіші", Configs = "Конфіги", Service = "Сервіс",
-            Aimbot = "Аімбот (Lock)", TeamCheck = "Team Check", VisibleCheck = "Visible Check", FOVRadius = "Радіус FOV",
+            Combat = "Бій", Visuals = "Візуали", CharTab = "Персонаж", Configs = "Конфіги", Service = "Сервіс",
+            Aimbot = "Авто-Аім (Auto Lock)", TeamCheck = "Team Check", VisibleCheck = "Visible Check", FOVRadius = "Радіус FOV",
             HeadChance = "Шанс Голова (%)", BodyChance = "Шанс Тіло (%)", Nicknames = "Нікнейми", Boxes = "Бокси ESP",
             HPBar = "Смужка ХП", Skeleton = "Скелет", Lines = "Лінії (Tracers)", RGB_FOV = "RGB Колір FOV",
             RGB_Menu = "Фулл Меню RGB", RGB_ESP = "RGB ESP", SpeedHack = "SpeedHack", SpeedVal = "Швидкість",
             SuperJump = "Super Jump", JumpVal = "Висота Стрибка", Noclip = "Noclip", InfJump = "Inf Jump",
-            KeyToggle = "Відкриття Меню", KeyAim = "Кнопка Aim", KeyESP = "Кнопка ESP", SaveCfg = "Зберегти",
-            LoadCfg = "Завантажити", KillSwitch = "🛑 ВИМКНУТИ"
+            KillSwitch = "🛑 ВИМКНУТИ"
         }
     }
 
     local Features = {
         Aimbot = false, TeamCheck = true, VisibleCheck = true,
-        AimbotFOV = 250, HeadChance = 80, BodyChance = 20,
+        AimbotFOV = 200, HeadChance = 85, BodyChance = 15,
         RGB_Menu = false, RGB_FOV = false, RGB_ESP = false,
         ESP_Box = false, ESP_HPBar = true, ESP_Skeleton = false, ESP_Names = false, ESP_Tracers = false,
         ESP_BoxColor = Color3.fromRGB(255, 50, 80),
@@ -89,9 +83,7 @@ local function LaunchHub()
         UIScale = 13, UIThemeColor = Color3.fromRGB(255, 50, 80)
     }
 
-    local Keybinds = { ToggleMenu = nil, AimbotKey = nil, ESPKey = nil }
-
-    -- МОБІЛЬНА ПЛАВАЮЧА КНОПКА ВІДКРИТТЯ
+    -- ПЛАВАЮЧА КНОПКА
     local OpenToggle = Instance.new("TextButton", ScreenGui)
     OpenToggle.Size, OpenToggle.Position = UDim2.new(0, 90, 0, 40), UDim2.new(0, 15, 0.35, 0)
     OpenToggle.Text, OpenToggle.TextColor3, OpenToggle.TextSize = "⚡ ToBox", Color3.fromRGB(255, 255, 255), 14
@@ -99,7 +91,7 @@ local function LaunchHub()
     OpenToggle.Active, OpenToggle.Draggable = true, true
     local OpenStroke = ApplyStyle(OpenToggle, Color3.fromRGB(20, 18, 28), Color3.fromRGB(0, 255, 120), 10)
 
-    -- ГОЛОВНЕ МОБІЛЬНЕ ВІКНО (ЗБІЛЬШЕНЕ ДЛЯ ЗРУЧНОСТІ ТИЧЕННЯ ПАЛЬЦЕМ)
+    -- ГОЛОВНЕ ВІКНО
     local Main = Instance.new("Frame", ScreenGui)
     Main.Size, Main.Position = UDim2.new(0, 520, 0, 360), UDim2.new(0.5, -260, 0.5, -180)
     Main.Active, Main.Draggable, Main.Visible = true, true, true
@@ -128,7 +120,6 @@ local function LaunchHub()
 
     OpenToggle.MouseButton1Click:Connect(function() Main.Visible = not Main.Visible end)
 
-    -- БІЧНА ПАНЕЛЬ НАВІГАЦІЇ
     local Sidebar = Instance.new("Frame", Main)
     Sidebar.Size, Sidebar.Position = UDim2.new(0, 130, 1, -50), UDim2.new(0, 8, 0, 42)
     ApplyStyle(Sidebar, Color3.fromRGB(18, 16, 26), Color3.fromRGB(40, 35, 60), 8)
@@ -154,7 +145,7 @@ local function LaunchHub()
     end
 
     local pagesData = {
-        Combat = CreatePage(), Visuals = CreatePage(), CharTab = CreatePage(), Keys = CreatePage(), Configs = CreatePage(), Service = CreatePage()
+        Combat = CreatePage(), Visuals = CreatePage(), CharTab = CreatePage(), Configs = CreatePage(), Service = CreatePage()
     }
 
     local function AddNavButton(nameKey, icon)
@@ -175,7 +166,6 @@ local function LaunchHub()
     AddNavButton("Combat", "⚔️")
     AddNavButton("Visuals", "👁️")
     AddNavButton("CharTab", "🏃")
-    AddNavButton("Keys", "⌨️")
     AddNavButton("Configs", "📁")
     AddNavButton("Service", "⚙️")
 
@@ -283,7 +273,7 @@ local function LaunchHub()
         ScreenGui:Destroy()
     end)
 
-    -- ЛОГІКА АІМБОТА ТА ESP
+    -- ЛОГІКА СКРИПТА
     local FOVCircle = Drawing.new("Circle")
     FOVCircle.Thickness, FOVCircle.Filled, FOVCircle.Visible = 1.5, false, false
     local ESP_Store = {}
@@ -328,7 +318,7 @@ local function LaunchHub()
 
     local function GetClosestTarget()
         local target, minD = nil, Features.AimbotFOV
-        local mPos = UserInputService:GetMouseLocation()
+        local screenCenter = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
         for _, p in pairs(Players:GetPlayers()) do
             if IsValidTarget(p) and p.Character then
                 local headPart = p.Character:FindFirstChild("Head")
@@ -337,7 +327,7 @@ local function LaunchHub()
                 if chosenTargetPart and IsVisible(chosenTargetPart) then
                     local pos, onS = Camera:WorldToViewportPoint(chosenTargetPart.Position)
                     if onS then
-                        local d = (Vector2.new(pos.X, pos.Y) - mPos).Magnitude
+                        local d = (Vector2.new(pos.X, pos.Y) - screenCenter).Magnitude
                         if d < minD then minD = d target = chosenTargetPart end
                     end
                 end
@@ -361,15 +351,21 @@ local function LaunchHub()
     end)
 
     RunService:BindToRenderStep("ToBoxLoop", Enum.RenderPriority.Camera.Value + 1, function()
-        local mPos = UserInputService:GetMouseLocation()
-        FOVCircle.Position, FOVCircle.Radius, FOVCircle.Visible = mPos, Features.AimbotFOV, Features.Aimbot
+        -- ФОВ СТРОГО ПО ЦЕНТРУ ЕКРАНА
+        FOVCircle.Position = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
+        FOVCircle.Radius = Features.AimbotFOV
+        FOVCircle.Visible = Features.Aimbot
+
         if not Features.RGB_FOV then FOVCircle.Color = Features.ESP_BoxColor end
 
         local currentEspColor = Features.RGB_ESP and Color3.fromHSV((tick() % 5) / 5, 1, 1) or Features.ESP_BoxColor
 
-        if Features.Aimbot and UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton2) then
+        -- АВТОМАТИЧНИЙ АІМБОТ БЕЗ КНОПОК
+        if Features.Aimbot then
             local target = GetClosestTarget()
-            if target then Camera.CFrame = Camera.CFrame:Lerp(CFrame.new(Camera.CFrame.Position, target.Position), 0.75) end
+            if target then
+                Camera.CFrame = Camera.CFrame:Lerp(CFrame.new(Camera.CFrame.Position, target.Position), 0.8)
+            end
         end
 
         for p, e in pairs(ESP_Store) do
@@ -415,6 +411,7 @@ local function LaunchHub()
                         e.Box.Position = Vector2.new(pos.X - w/2, headV.Y)
                         e.Box.Color = currentEspColor
 
+                        -- ХП БАР
                         if Features.ESP_Box and Features.ESP_HPBar then
                             local hpPct = math.clamp(hum.Health / hum.MaxHealth, 0, 1)
                             e.HPBarBg.Visible, e.HPBarFill.Visible = true, true
@@ -436,11 +433,37 @@ local function LaunchHub()
                         e.Tracer.From = Vector2.new(Camera.ViewportSize.X/2, Camera.ViewportSize.Y)
                         e.Tracer.To = Vector2.new(pos.X, legV.Y)
                         e.Tracer.Color = currentEspColor
+
+                        -- СКЕЛЕТ
+                        if Features.ESP_Skeleton then
+                            for _, sk in ipairs(e.Skeleton) do
+                                local pA = ch:FindFirstChild(sk.A)
+                                local pB = ch:FindFirstChild(sk.B)
+                                if pA and pB then
+                                    local vA, sA = Camera:WorldToViewportPoint(pA.Position)
+                                    local vB, sB = Camera:WorldToViewportPoint(pB.Position)
+                                    if sA and sB then
+                                        sk.Line.Visible = true
+                                        sk.Line.From = Vector2.new(vA.X, vA.Y)
+                                        sk.Line.To = Vector2.new(vB.X, vB.Y)
+                                        sk.Line.Color = currentEspColor
+                                    else
+                                        sk.Line.Visible = false
+                                    end
+                                else
+                                    sk.Line.Visible = false
+                                end
+                            end
+                        else
+                            for _, sk in ipairs(e.Skeleton) do sk.Line.Visible = false end
+                        end
                     else
                         e.Box.Visible, e.HPBarBg.Visible, e.HPBarFill.Visible, e.Name.Visible, e.Tracer.Visible = false, false, false, false, false
+                        for _, sk in ipairs(e.Skeleton) do sk.Line.Visible = false end
                     end
                 else
                     e.Box.Visible, e.HPBarBg.Visible, e.HPBarFill.Visible, e.Name.Visible, e.Tracer.Visible = false, false, false, false, false
+                    for _, sk in ipairs(e.Skeleton) do sk.Line.Visible = false end
                 end
             end
         end
@@ -466,7 +489,6 @@ local function LaunchHub()
     end)
 end
 
--- ПЕРЕВІРКА ПАРОЛЯ ПРИ НАТИСКАННІ КНОПКИ
 SubmitBtn.MouseButton1Click:Connect(function()
     if KeyBox.Text == CORRECT_KEY then
         LaunchHub()
